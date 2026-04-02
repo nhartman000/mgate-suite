@@ -17,3 +17,8 @@ mgate-suite/
 │   └── run_project.py
 │
 └── requirements.txt
+
+
+pip install -r requirements.txt
+
+python cli/run_project.py ./example project.mg8
