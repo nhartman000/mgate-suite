@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["schema_version", "projects"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "projects": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
