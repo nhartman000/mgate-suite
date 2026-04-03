@@ -128,7 +128,7 @@ class Executor:
                 "parent_trace_id": parent_trace_id,
                 "parent_trace_ids": parent_trace_ids if len(parent_trace_ids) > 1 else None,
                 "run_trace_id": self.audit.run_trace_id,
-                "source_objects": {"gate_id": gate_id, "gst_id": self.gst['context_id']},
+                "source_objects": {"gate_id": current_gate, "gst_id": self.gst['context_id']},
                 "source_paths": {
                     "mg8": self.project.mg8_rel_path,
                     "gitson": self.project.gitson_rel_path,
