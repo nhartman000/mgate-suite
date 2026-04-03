@@ -1,6 +1,7 @@
 import uuid
 from collections import deque
 from .model_adapter import call_model
+from .kadmon import KadmonNegotiation
 
 class Executor:
     def __init__(self, project, audit):
@@ -48,6 +49,10 @@ class Executor:
         return parent_traces, parent_traces[-1]
 
     def run(self):
+        # Check if this is a Kadmon negotiation gate
+        if any(g.get('gate_type') == 'KADMON' for g in self.gates.values()):
+            return self._run_kadmon_negotiation()
+            
         execution_order = []
         visited = set()
         current_gate = self.gitson['graph']['nodes'][0]
@@ -144,4 +149,42 @@ class Executor:
             else:
                 current_gate = None
         
+        return self.audit.data
+        
+    def _run_kadmon_negotiation(self):
+        kadmon = KadmonNegotiation()
+        max_rounds = 20
+        
+        for round in range(max_rounds):
+            # Agent 1 turn
+            stability = kadmon.calculate_stability()
+            
+            event = {
+                "trace_id": f"TRJ_{str(uuid.uuid4())}",
+                "parent_trace_id": self.audit.run_trace_id,
+                "run_trace_id": self.audit.run_trace_id,
+                "source_objects": {"gate_id": "KADMON", "round": round},
+                "source_paths": {
+                    "mg8": self.project.mg8_rel_path,
+                    "gitson": self.project.gitson_rel_path,
+                    "gst": self.project.gst_rel_path
+                },
+                "kadmon": stability,
+                "decision": "propose",
+                "status": "negotiating",
+                "confidence_at_decision": stability['mathematical'],
+                "ambiguity": False,
+                "rule_triggered": []
+            }
+            
+            self.audit.log_event(event)
+            
+            # Check for consensus
+            if kadmon.check_consensus(0.9):
+                final_event = event.copy()
+                final_event["status"] = "consensus"
+                final_event["decision"] = "accept"
+                self.audit.log_event(final_event)
+                break
+                
         return self.audit.data
