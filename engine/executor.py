@@ -70,10 +70,11 @@ class Executor:
             
             # Evaluate boolean gate conditions
             condition_results = []
-            for cond in gate['conditions']:
-                left = cond['left']
-                op = cond['operator']
-                right = cond['right']
+            if 'conditions' in gate:
+                for cond in gate['conditions']:
+                    left = cond['left']
+                    op = cond['operator']
+                    right = cond['right']
                 
                 if op == '=':
                     res = (left == right)
@@ -95,7 +96,7 @@ class Executor:
                 condition_results.append(res)
             
             # Evaluate gate type logic
-            gate_type = gate['gate_type']
+            gate_type = gate.get('gate_type', 'BOOLEAN')
             if gate_type == 'AND':
                 gate_passed = all(condition_results)
             elif gate_type == 'OR':
