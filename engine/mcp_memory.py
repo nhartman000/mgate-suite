@@ -69,7 +69,8 @@ class MCPMemoryServer:
             "type": "memory_server_initialized",
             "context_id": context_id,
             "run_trace_id": run_trace_id,
-            "center_point": self.center_point
+            "center_point": self.center_point,
+            "parent_trace_ids": []
         })
     
     def write(self, key: str, value: Any, caller_order: int, trace_id: str) -> str:
@@ -96,7 +97,9 @@ class MCPMemoryServer:
             "key": key,
             "entry_id": entry_id,
             "caller_order": caller_order,
-            "trace_id": trace_id
+            "trace_id": trace_id,
+            "parent_trace_ids": [],
+            "parent_trace_ids": []
         })
         
         return entry_id
@@ -116,7 +119,8 @@ class MCPMemoryServer:
                 "type": "memory_read_miss",
                 "key": key,
                 "caller_order": caller_order,
-                "trace_id": trace_id
+                "trace_id": trace_id,
+            "parent_trace_ids": []
             })
             return None
         
@@ -131,7 +135,8 @@ class MCPMemoryServer:
             "entry_id": entry.id,
             "stability": entry.stability,
             "caller_order": caller_order,
-            "trace_id": trace_id
+            "trace_id": trace_id,
+            "parent_trace_ids": []
         })
         
         return entry.value
@@ -155,7 +160,8 @@ class MCPMemoryServer:
             "prefix": prefix,
             "count": len(results),
             "caller_order": caller_order,
-            "trace_id": trace_id
+            "trace_id": trace_id,
+            "parent_trace_ids": []
         })
         
         return results
@@ -170,14 +176,16 @@ class MCPMemoryServer:
                         "key": key,
                         "lock_holder": lock_holder,
                         "caller_order": caller_order,
-                        "trace_id": trace_id
+                        "trace_id": trace_id,
+            "parent_trace_ids": []
                     })
                     return True
                 else:
                     self.audit.log("memory_lock_contended", {
                         "key": key,
                         "current_holder": entry.locks[0],
-                        "trace_id": trace_id
+                        "trace_id": trace_id,
+            "parent_trace_ids": []
                     })
                     return False
         return False
@@ -190,7 +198,8 @@ class MCPMemoryServer:
                 self.audit.log("memory_lock_released", {
                     "key": key,
                     "lock_holder": lock_holder,
-                    "trace_id": trace_id
+                    "trace_id": trace_id,
+            "parent_trace_ids": []
                 })
                 return True
         return False
