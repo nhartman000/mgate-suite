@@ -18,7 +18,7 @@ fltmc >nul 2>&1 || (
 )
 
 set INSTALL_ROOT=C:\Kadmon
-set FRONTEND_PORT=8080
+set FRONTEND_PORT=3000
 set API_PORT=5000
 
 echo.
@@ -79,7 +79,7 @@ echo @echo off > "%INSTALL_ROOT%\start_kadmon.bat"
 echo cd /d "%INSTALL_ROOT%" >> "%INSTALL_ROOT%\start_kadmon.bat"
 echo start /b python api/server.py >> "%INSTALL_ROOT%\start_kadmon.bat"
 echo timeout /t 5 /nobreak ^>nul >> "%INSTALL_ROOT%\start_kadmon.bat"
-echo start http://localhost:5173 >> "%INSTALL_ROOT%\start_kadmon.bat"
+echo start http://localhost:3000 >> "%INSTALL_ROOT%\start_kadmon.bat"
 echo cd frontend >> "%INSTALL_ROOT%\start_kadmon.bat"
 echo call npm run dev >> "%INSTALL_ROOT%\start_kadmon.bat"
 
