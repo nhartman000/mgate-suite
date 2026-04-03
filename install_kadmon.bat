@@ -60,8 +60,8 @@ pip install flask flask-cors requests python-dotenv --quiet
 echo.
 echo [5/10] Configuring frontend interface...
 cd "%INSTALL_ROOT%\frontend"
-npm install --silent >nul 2>&1
-npm run build >nul 2>&1
+call npm install
+call npm run build
 
 echo.
 echo [6/10] Initializing Mobius invariant subsystem...
@@ -77,11 +77,11 @@ echo.
 echo [7/10] Creating system startup scripts...
 echo @echo off > "%INSTALL_ROOT%\start_kadmon.bat"
 echo cd /d "%INSTALL_ROOT%" >> "%INSTALL_ROOT%\start_kadmon.bat"
-echo start /min python -m api.server >> "%INSTALL_ROOT%\start_kadmon.bat"
-echo timeout /t 3 /nobreak ^>nul >> "%INSTALL_ROOT%\start_kadmon.bat"
-echo start http://localhost:%FRONTEND_PORT% >> "%INSTALL_ROOT%\start_kadmon.bat"
+echo start /b python api/server.py >> "%INSTALL_ROOT%\start_kadmon.bat"
+echo timeout /t 5 /nobreak ^>nul >> "%INSTALL_ROOT%\start_kadmon.bat"
+echo start http://localhost:5173 >> "%INSTALL_ROOT%\start_kadmon.bat"
 echo cd frontend >> "%INSTALL_ROOT%\start_kadmon.bat"
-echo npm run dev >> "%INSTALL_ROOT%\start_kadmon.bat"
+echo call npm run dev >> "%INSTALL_ROOT%\start_kadmon.bat"
 
 echo.
 echo [8/10] Creating desktop integration...
