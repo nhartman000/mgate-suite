@@ -5,6 +5,7 @@ from .model_adapter import call_model
 from .loader import load_project
 from .audit import AuditLog
 from .mcp_memory import MemoryServerBridge
+from .nych import NYCHBridge
 
 KADMON_SCHEMA_HEADER = """
 KADMON SCHEMA HEADER:
@@ -30,9 +31,11 @@ class KadmonEnvironment:
         self.contained_systems = {
             "second_order": [],
             "third_order": [],
-            "fourth_order": []
+            "fourth_order": [],
+            "fifth_order": []
         }
         self.memory_bridge = MemoryServerBridge(self)
+        self.nych_bridge = NYCHBridge()
         
     def start(self):
         """Initialize 1st order environment"""
@@ -147,6 +150,21 @@ class KadmonEnvironment:
     def get_memory_server(self, context_id: str):
         """Get direct reference to 4th order memory server (for internal use)"""
         return self.memory_bridge.get_server(context_id)
+    
+    def enable_nych(self):
+        """Enable 5th order NYCH system at current environment level"""
+        self.nych_bridge.attach(self, 1)
+        self.contained_systems["fifth_order"].append({
+            "type": "nych_encoder",
+            "attached_at": datetime.utcnow(),
+            "order_level": 5
+        })
+    
+    def nych_process(self, text: str) -> dict:
+        """Process natural language through 5th order NYCH system"""
+        if not self.nych_bridge.attached_to:
+            self.enable_nych()
+        return self.nych_bridge.process_input(text)
     
     def shutdown(self):
         self.running = False

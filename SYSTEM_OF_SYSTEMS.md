@@ -10,6 +10,7 @@
 | **2nd Order** | PAIR / COUPLE | Dual LLM configuration. | Operates *only* within Kadmon. Shares center point. |
 | **3rd Order** | LLM Models | Gemini, GPT, Grok, Claude. | Plug into Kadmon via API. No agency. Schema enforced on every call. |
 | **4th Order** | MGATE | Deterministic reasoning pipeline. | Executes structured gates within model context. |
+| **5th Order** | NYCH | Natural Language Gestalt Emoji Mapper. | Zero API gestalt shape matching. Operates at any injection point. |
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -34,6 +35,12 @@
 │  │  │ │4th Order MGATE│ │   │ │4th Order MGATE│ │    │  │
 │  │  │ │ Deterministic │ │   │ │ Deterministic │ │    │  │
 │  │  │ │ Gates / DAG   │ │   │ │ Gates / DAG   │ │    │  │
+│  │  │ │               │ │   │ │               │ │    │  │
+│  │  │ │ ┌───────────┐ │ │   │ │ ┌───────────┐ │ │    │  │
+│  │  │ │ │5th NYCH   │ │ │   │ │ │5th NYCH   │ │ │    │  │
+│  │  │ │ │ Gestalt   │ │ │   │ │ │ Gestalt   │ │ │    │  │
+│  │  │ │ │ Emoji     │ │ │   │ │ │ Emoji     │ │ │    │  │
+│  │  │ │ └───────────┘ │ │   │ │ └───────────┘ │ │    │  │
 │  │  │ └───────────────┘ │   │ └───────────────┘ │    │  │
 │  │  └───────────────────┘   └───────────────────┘    │  │
 │  └─────────────────────────────────────────────────────┘  │
