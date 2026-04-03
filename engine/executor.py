@@ -55,6 +55,10 @@ class Executor:
             
         execution_order = []
         visited = set()
+        
+        if not self.gitson['graph']['nodes']:
+            raise ValueError("No nodes defined in graph")
+            
         current_gate = self.gitson['graph']['nodes'][0]
         
         while current_gate and current_gate not in visited:
@@ -106,7 +110,7 @@ class Executor:
             elif gate_type == 'NOR':
                 gate_passed = not any(condition_results)
             elif gate_type == 'BOOLEAN':
-                gate_passed = condition_results[0]
+                gate_passed = condition_results[0] if condition_results else True
             else:
                 gate_passed = False
             
