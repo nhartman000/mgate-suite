@@ -4,6 +4,7 @@ from .kadmon import KADMON_POINTS, KadmonNegotiation, mandelbrot_stability
 from .model_adapter import call_model
 from .loader import load_project
 from .audit import AuditLog
+from .mcp_memory import MemoryServerBridge
 
 KADMON_SCHEMA_HEADER = """
 KADMON SCHEMA HEADER:
@@ -31,6 +32,7 @@ class KadmonEnvironment:
             "third_order": [],
             "fourth_order": []
         }
+        self.memory_bridge = MemoryServerBridge(self)
         
     def start(self):
         """Initialize 1st order environment"""
@@ -126,5 +128,25 @@ class KadmonEnvironment:
             "history": kadmon.history
         }
         
+    def create_memory_server(self, context_id: str = None) -> str:
+        """Create 4th order MCP Memory Server instance accessible from 1st order"""
+        return self.memory_bridge.create_memory_server(context_id)
+    
+    def memory_write(self, context_id: str, key: str, value: Any) -> str:
+        """Write to 4th order memory server from 1st order environment"""
+        return self.memory_bridge.memory_write(context_id, key, value)
+    
+    def memory_read(self, context_id: str, key: str) -> Any:
+        """Read from 4th order memory server from 1st order environment"""
+        return self.memory_bridge.memory_read(context_id, key)
+    
+    def memory_scan(self, context_id: str, prefix: str) -> list:
+        """Scan 4th order memory server from 1st order environment"""
+        return self.memory_bridge.memory_scan(context_id, prefix)
+    
+    def get_memory_server(self, context_id: str):
+        """Get direct reference to 4th order memory server (for internal use)"""
+        return self.memory_bridge.get_server(context_id)
+    
     def shutdown(self):
         self.running = False
