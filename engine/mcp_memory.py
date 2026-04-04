@@ -98,7 +98,6 @@ class MCPMemoryServer:
             "entry_id": entry_id,
             "caller_order": caller_order,
             "trace_id": trace_id,
-            "parent_trace_ids": [],
             "parent_trace_ids": []
         })
         
@@ -156,7 +155,8 @@ class MCPMemoryServer:
         
         results.sort(key=lambda e: -e["stability"])
         
-        self.audit.log("memory_scan", {
+        self.audit.log_event({
+            "type": "memory_scan",
             "prefix": prefix,
             "count": len(results),
             "caller_order": caller_order,
@@ -172,20 +172,22 @@ class MCPMemoryServer:
             if entry.key == key and caller_order <= entry.owner_order:
                 if not entry.locks:
                     entry.locks.append(lock_holder)
-                    self.audit.log("memory_lock_acquired", {
+                    self.audit.log_event({
+                        "type": "memory_lock_acquired",
                         "key": key,
                         "lock_holder": lock_holder,
                         "caller_order": caller_order,
                         "trace_id": trace_id,
-            "parent_trace_ids": []
+                        "parent_trace_ids": []
                     })
                     return True
                 else:
-                    self.audit.log("memory_lock_contended", {
+                    self.audit.log_event({
+                        "type": "memory_lock_contended",
                         "key": key,
                         "current_holder": entry.locks[0],
                         "trace_id": trace_id,
-            "parent_trace_ids": []
+                        "parent_trace_ids": []
                     })
                     return False
         return False
@@ -195,11 +197,12 @@ class MCPMemoryServer:
         for entry in self.memory.values():
             if entry.key == key and lock_holder in entry.locks:
                 entry.locks.remove(lock_holder)
-                self.audit.log("memory_lock_released", {
+                self.audit.log_event({
+                    "type": "memory_lock_released",
                     "key": key,
                     "lock_holder": lock_holder,
                     "trace_id": trace_id,
-            "parent_trace_ids": []
+                    "parent_trace_ids": []
                 })
                 return True
         return False
@@ -219,10 +222,12 @@ class MCPMemoryServer:
             removed += 1
         
         if removed > 0:
-            self.audit.log("memory_gc", {
+            self.audit.log_event({
+                "type": "memory_gc",
                 "removed": removed,
                 "threshold": stability_threshold,
-                "remaining": len(self.memory)
+                "remaining": len(self.memory),
+                "parent_trace_ids": []
             })
         
         return removed
@@ -238,7 +243,7 @@ class MCPMemoryServer:
             "average_stability": sum(e.stability for e in self.memory.values()) / len(self.memory) if self.memory else 0.0
         }
         
-        self.audit.log("memory_stats", stats)
+        self.audit.log_event({**stats, "type": "memory_stats", "parent_trace_ids": []})
         return stats
 
 class MemoryServerBridge:

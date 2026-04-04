@@ -1,23 +1,26 @@
 import uuid
 from datetime import datetime
+from typing import Any
 from .kadmon import KADMON_POINTS, KadmonNegotiation, mandelbrot_stability
 from .model_adapter import call_model
 from .loader import load_project
 from .audit import AuditLog
 from .mcp_memory import MemoryServerBridge
 from .nych import NYCHBridge
+from .plugin_registry import KadmonPluginRegistry, PluginManifest, PluginOrder
 
 KADMON_SCHEMA_HEADER = """
 KADMON SCHEMA HEADER:
-1st Ordered Dimension: Time axis
-2nd Ordered Dimension: Y axis
-3rd Ordered Dimension: Z axis (volumetric)
-4th Ordered Dimension: INVARIANT CENTER = C = -0.500003
+1st Ordered Dimension: Time — high preference for X axis
+2nd Ordered Dimension: Stance — high preference for Y axis
+3rd Ordered Dimension: Abstraction (volumetric) — high preference for Z axis
+4th Ordered Dimension: INVARIANT CENTER = C = -0.500003 (context, frame of reference)
 
-This is your frame of reference.
-All positions are relative to this center point.
-This center point is fixed and invariant.
-All operations occur within the Kadmon runtime environment.
+You are operating within the Kadmon Runtime Environment.
+Your center point is fixed at C = -0.500003.
+All positions are relative to this invariant center point.
+You have no agency. Kadmon initiates all calls.
+This schema is enforced on every prompt.
 """
 
 class KadmonEnvironment:
@@ -36,6 +39,8 @@ class KadmonEnvironment:
         }
         self.memory_bridge = MemoryServerBridge(self)
         self.nych_bridge = NYCHBridge()
+        # Plugin registry — modular system attachment point
+        self.plugin_registry = KadmonPluginRegistry(self)
         
     def start(self):
         """Initialize 1st order environment"""
@@ -76,12 +81,6 @@ class KadmonEnvironment:
         self.contained_systems["second_order"].append(pair)
         return pair
         
-    def call_llm(self, agent_id, prompt, seed=None):
-        """Schema enforced LLM call. 3rd order systems have no agency."""
-        full_prompt = KADMON_SCHEMA_HEADER + "\n" + prompt
-        response = call_model(full_prompt, seed)
-        return response
-        
     def execute_mgate(self, mg8_path):
         """Execute 4th order MGATE system within environment"""
         if not self.running:
@@ -107,12 +106,12 @@ class KadmonEnvironment:
         
         for round in range(max_rounds):
             # Agent 1 turn
-            response1 = self.call_llm(pair['agent1']['agent_id'], 
-                                     f"Round {round}. Current position: {kadmon.problem_position}")
+            prompt1 = f"Round {round}. Current position: {kadmon.problem_position}"
+            response1 = self.call_llm("agent_1", prompt1)
             
             # Agent 2 turn
-            response2 = self.call_llm(pair['agent2']['agent_id'], 
-                                     f"Round {round}. Evaluate position: {kadmon.problem_position}")
+            prompt2 = f"Round {round}. Evaluate position: {kadmon.problem_position}"
+            response2 = self.call_llm("agent_2", prompt2)
             
             stability = kadmon.calculate_stability()
             
@@ -168,3 +167,70 @@ class KadmonEnvironment:
     
     def shutdown(self):
         self.running = False
+
+    def register_plugin(self, manifest: PluginManifest):
+        """Register a custom plugin manifest with the environment."""
+        self.plugin_registry.register_manifest(manifest)
+
+    def install_plugin(self, plugin_id: str, config: dict = None):
+        """Install a plugin by id. Returns the PluginInstance."""
+        if not self.running:
+            raise Exception("Kadmon environment not started")
+        instance = self.plugin_registry.install(plugin_id, config)
+        return instance
+
+    def enable_plugin(self, instance_id: str):
+        """Enable an installed plugin. Activates its runtime object."""
+        return self.plugin_registry.enable(instance_id)
+
+    def disable_plugin(self, instance_id: str):
+        """Disable a running plugin."""
+        return self.plugin_registry.disable(instance_id)
+
+    def uninstall_plugin(self, instance_id: str):
+        """Uninstall a disabled plugin."""
+        self.plugin_registry.uninstall(instance_id)
+
+    def get_plugins(self, order=None):
+        """Return all plugin instances, optionally filtered by order level."""
+        return self.plugin_registry.get_instances(order)
+
+    def list_available_plugins(self):
+        """Return all available plugin manifests."""
+        return self.plugin_registry.list_available()
+
+    def plugin_status(self):
+        """Return full plugin registry snapshot as dict."""
+        return self.plugin_registry.to_dict()
+
+    def on_plugin_event(self, event: str, callback):
+        """Subscribe to plugin lifecycle events."""
+        self.plugin_registry.subscribe(event, callback)
+
+    def call_llm(self, agent_id, prompt, seed=None):
+        # REPLACE existing call_llm — now also emits a plugin event for observability
+        agent_markers = {
+            "agent_1": "AGENT: 1",
+            "agent_2": "AGENT: 2",
+        }
+        # Support dynamic agent IDs like agent_3, agent_4, etc.
+        if agent_id.startswith("agent_"):
+            try:
+                n = int(agent_id.split("_")[1])
+                agent_header = f"AGENT: {n}"
+            except (IndexError, ValueError):
+                agent_header = agent_markers.get(agent_id, "")
+        else:
+            agent_header = ""
+
+        full_prompt = (agent_header + "\n" if agent_header else "") + KADMON_SCHEMA_HEADER + "\n" + prompt
+        response = call_model(full_prompt, seed)
+
+        # Emit event for any plugin event subscribers
+        self.plugin_registry.emit("llm_call", {
+            "agent_id": agent_id,
+            "prompt_length": len(full_prompt),
+            "response_length": len(str(response))
+        })
+
+        return response

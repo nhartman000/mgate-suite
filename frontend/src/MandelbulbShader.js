@@ -1,15 +1,16 @@
 export const vertexShader = `
-  varying vec2 vUv;
   void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    // Render full screen quad
+    gl_Position = vec4(position.xy, 1.0, 1.0);
   }
 `;
 
 export const fragmentShader = `
   uniform float time;
   uniform vec2 resolution;
-  varying vec2 vUv;
+  uniform vec3 cameraPos;
+  uniform mat4 cameraWorldMatrix;
+  uniform mat4 cameraProjectionMatrixInverse;
 
   const int MAX_STEPS = 100;
   const float MAX_DIST = 50.0;
@@ -74,15 +75,11 @@ export const fragmentShader = `
   }
 
   void main() {
-    vec2 uv = (gl_FragCoord.xy - 0.5 * resolution) / resolution.y;
-    
-    vec3 ro = vec3(0.0, 0.0, 3.5 + sin(time * 0.1) * 0.2);
-    vec3 rd = normalize(vec3(uv, -1.0));
-    
-    float rot = time * 0.05;
-    mat2 rotMat = mat2(cos(rot), -sin(rot), sin(rot), cos(rot));
-    ro.xy *= rotMat;
-    rd.xy *= rotMat;
+    // Reconstruct world space ray from frustum
+    vec4 ndc = vec4( (gl_FragCoord.xy / resolution.xy) * 2.0 - 1.0, 1.0, 1.0 );
+    vec4 viewDir = cameraProjectionMatrixInverse * ndc;
+    vec3 rd = normalize((cameraWorldMatrix * vec4(viewDir.xyz, 0.0)).xyz);
+    vec3 ro = cameraPos;
     
     vec3 result = rayMarch(ro, rd);
     

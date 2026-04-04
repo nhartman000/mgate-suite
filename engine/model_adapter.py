@@ -9,7 +9,7 @@ except ImportError:
     VERTEX_AVAILABLE = False
 
 def call_model(prompt, seed=None):
-    if VERTEX_AVAILABLE and os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
+    if VERTEX_AVAILABLE:
         project = os.environ.get('GCP_PROJECT_ID', 'true-artwork-479005-r3')
         location = os.environ.get('GCP_LOCATION', 'us-central1')
         
