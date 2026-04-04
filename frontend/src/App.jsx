@@ -71,6 +71,16 @@ export default function App() {
   const [plugins, setPlugins] = useState({ available_plugins: [], installed: [] })
   const [pluginsOpen, setPluginsOpen] = useState(false)
   const [nychResult, setNychResult] = useState(null)
+  
+  // View state
+  const [view2D, setView2D] = useState(false)
+  const [showTutorial, setShowTutorial] = useState(false)
+  const [selectedAgents, setSelectedAgents] = useState(new Set())
+  
+  // View state
+  const [view2D, setView2D] = useState(false)
+  const [showTutorial, setShowTutorial] = useState(false)
+  const [selectedAgents, setSelectedAgents] = useState(new Set())
 
   useEffect(() => {
     return () => {
@@ -84,6 +94,86 @@ export default function App() {
       .then(data => setPlugins(data))
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return
+      
+      switch(e.key) {
+        case ' ':
+          e.preventDefault()
+          startNegotiation()
+          break
+        case 'Escape':
+          setPluginsOpen(false)
+          setShowTutorial(false)
+          break
+        case 'Tab':
+          e.preventDefault()
+          addAgent()
+          break
+        case '1':
+        case '2':
+        case '3':
+          setNegotiationMode(parseInt(e.key) === 2 ? 'PAIR' : 'COUPLE')
+          break
+        case 'v':
+        case 'V':
+          setView2D(prev => !prev)
+          break
+        case 'h':
+        case 'H':
+        case '?':
+          setShowTutorial(prev => !prev)
+          break
+        default:
+          break
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [negotiationMode, registeredAgents.length, trainingActive])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return
+      
+      switch(e.key) {
+        case ' ':
+          e.preventDefault()
+          startNegotiation()
+          break
+        case 'Escape':
+          setPluginsOpen(false)
+          setShowTutorial(false)
+          break
+        case 'Tab':
+          e.preventDefault()
+          addAgent()
+          break
+        case '1':
+        case '2':
+        case '3':
+          setNegotiationMode(parseInt(e.key) === 2 ? 'PAIR' : 'COUPLE')
+          break
+        case 'v':
+        case 'V':
+          setView2D(prev => !prev)
+          break
+        case 'h':
+        case 'H':
+        case '?':
+          setShowTutorial(prev => !prev)
+          break
+        default:
+          break
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [negotiationMode, registeredAgents.length, trainingActive])
 
   const addAgent = () => {
     const idx = agents.length
@@ -262,9 +352,47 @@ export default function App() {
 
       {/* LEFT DASHBOARD PANEL */}
       <div style={{ flex: 1, padding: 20, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        <h1 style={{ color: '#00ffaa', margin: '0 0 4px 0', borderBottom: '1px solid #223', paddingBottom: 8, fontFamily: 'monospace', letterSpacing: 2 }}>
-          1st ORDER KADMON RUNTIME ENVIRONMENT
-        </h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <h1 style={{ color: '#00ffaa', margin: 0, fontFamily: 'monospace', letterSpacing: 2, fontSize: 18 }}>
+            1st ORDER KADMON RUNTIME ENVIRONMENT
+          </h1>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => setView2D(v => !v)}
+              style={{
+                padding: '4px 10px',
+                background: view2D ? '#003377' : '#1a1a2e',
+                border: `1px solid ${view2D ? '#00aaff' : '#334'}`,
+                color: view2D ? '#00aaff' : '#556',
+                cursor: 'pointer',
+                fontFamily: 'monospace',
+                fontSize: 10,
+                borderRadius: 3,
+                fontWeight: 'bold'
+              }}
+              title="Toggle between 2D Mandelbrot and 3D Mandelbulb"
+            >
+              {view2D ? '2D' : '3D'}
+            </button>
+            <button
+              onClick={() => setShowTutorial(t => !t)}
+              style={{
+                padding: '4px 10px',
+                background: showTutorial ? '#220044' : '#1a1a2e',
+                border: `1px solid ${showTutorial ? '#cc88ff' : '#334'}`,
+                color: showTutorial ? '#cc88ff' : '#556',
+                cursor: 'pointer',
+                fontFamily: 'monospace',
+                fontSize: 10,
+                borderRadius: 3,
+                fontWeight: 'bold'
+              }}
+              title="Show tutorial and help"
+            >
+              ? HELP
+            </button>
+          </div>
+        </div>
 
         {/* SYSTEM HIERARCHY PANEL */}
         <div style={{
@@ -773,8 +901,97 @@ export default function App() {
           iu={coords.iu}
           center={coords.center}
           negotiationPositions={negotiationPositions}
+          view2D={view2D}
         />
+        
+        {/* Keyboard shortcuts overlay */}
+        <div style={{
+          position: 'absolute',
+          bottom: 12,
+          left: 12,
+          background: 'rgba(10, 10, 26, 0.85)',
+          border: '1px solid #2a2a44',
+          borderRadius: 4,
+          padding: '8px 10px',
+          fontFamily: 'monospace',
+          fontSize: 9,
+          color: '#445566',
+          lineHeight: 1.6,
+          pointerEvents: 'none',
+          zIndex: 10
+        }}>
+          <div><span style={{ color: '#00aaff' }}>Space</span> Start negotiation</div>
+          <div><span style={{ color: '#00aaff' }}>Tab</span> Add agent</div>
+          <div><span style={{ color: '#00aaff' }}>V</span> Toggle 2D/3D</div>
+          <div><span style={{ color: '#00aaff' }}>1-3</span> Select mode</div>
+          <div><span style={{ color: '#00aaff' }}>Esc</span> Close panels</div>
+          <div><span style={{ color: '#00aaff' }}>H/?</span> Help</div>
+        </div>
       </div>
+
+      {/* Tutorial modal */}
+      {showTutorial && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: '#0a0a1a',
+          border: '2px solid #cc88ff',
+          borderRadius: 8,
+          padding: 24,
+          maxWidth: 600,
+          maxHeight: '80vh',
+          overflowY: 'auto',
+          zIndex: 1000,
+          boxShadow: '0 0 40px rgba(204, 136, 255, 0.3)',
+          fontFamily: 'monospace'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 style={{ color: '#cc88ff', margin: 0, fontSize: 16, letterSpacing: 1 }}>◈ KADMON TUTORIAL</h2>
+            <button
+              onClick={() => setShowTutorial(false)}
+              style={{
+                background: 'none',
+                border: '1px solid #334',
+                color: '#556',
+                padding: '2px 8px',
+                cursor: 'pointer',
+                fontFamily: 'monospace',
+                fontSize: 12,
+                borderRadius: 3
+              }}
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div style={{ color: '#8899bb', fontSize: 11, lineHeight: 1.8 }}>
+            <h3 style={{ color: '#00ffaa', fontSize: 13, marginTop: 16, marginBottom: 8 }}>▸ Getting Started</h3>
+            <p>1. <strong style={{ color: '#00aaff' }}>Register agents:</strong> Fill in agent name, select model type, enter API endpoint, then click REGISTER.</p>
+            <p>2. <strong style={{ color: '#00aaff' }}>Add prompts:</strong> Type semantic prompts for each agent and click SEND.</p>
+            <p>3. <strong style={{ color: '#00aaff' }}>Start negotiation:</strong> Click START TRIADIC NEGOTIATION (or press Space) to begin the iterative alignment process.</p>
+            
+            <h3 style={{ color: '#00ffaa', fontSize: 13, marginTop: 16, marginBottom: 8 }}>▸ Interface Elements</h3>
+            <p>• <strong style={{ color: '#ffaa44' }}>Left Panel:</strong> Agent controls, plugin manager, NYCH encoder, system hierarchy.</p>
+            <p>• <strong style={{ color: '#ffaa44' }}>Right Panel:</strong> 3D Mandelbulb visualization showing negotiation geometry in real-time.</p>
+            <p>• <strong style={{ color: '#ffaa44' }}>Center point C:</strong> Invariant center at -0.500003 (stability anchor).</p>
+            
+            <h3 style={{ color: '#00ffaa', fontSize: 13, marginTop: 16, marginBottom: 8 }}>▸ Keyboard Shortcuts</h3>
+            <p>• <strong style={{ color: '#00aaff' }}>Space:</strong> Start/pause negotiation</p>
+            <p>• <strong style={{ color: '#00aaff' }}>Tab:</strong> Add new agent slot</p>
+            <p>• <strong style={{ color: '#00aaff' }}>V:</strong> Toggle 2D/3D view</p>
+            <p>• <strong style={{ color: '#00aaff' }}>Esc:</strong> Close open panels</p>
+            <p>• <strong style={{ color: '#00aaff' }}>H / ?:</strong> Show/hide this help</p>
+            
+            <h3 style={{ color: '#00ffaa', fontSize: 13, marginTop: 16, marginBottom: 8 }}>▸ NYCH 5th Order Encoder</h3>
+            <p>Enter natural language text to encode it into NYCH symbol streams. Use operator rack to apply gestalt operations (align, check, shift, amplify, interrupt, stabilize).</p>
+            
+            <h3 style={{ color: '#00ffaa', fontSize: 13, marginTop: 16, marginBottom: 8 }}>▸ Plugin Manager</h3>
+            <p>Browse available plugins by order (2nd-5th), install them, and enable/disable to extend system capabilities.</p>
+          </div>
+        </div>
+      )}
 
     </div>
   )

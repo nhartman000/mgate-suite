@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useState, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Line, Sphere, Text } from '@react-three/drei'
 import * as THREE from 'three'
@@ -168,13 +168,144 @@ const AgentPositions = ({ negotiationPositions }) => {
   )
 }
 
-export default function Scene3D({ user, query, ai, iu, center, negotiationPositions }) {
+const Mandelbrot2D = () => {
+  const canvasRef = useRef()
+  const [iterationCount, setIterationCount] = useState(100)
+  
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    
+    const ctx = canvas.getContext('2d')
+    const width = canvas.width
+    const height = canvas.height
+    
+    const imageData = ctx.createImageData(width, height)
+    const data = imageData.data
+    
+    const xMin = -2.5
+    const xMax = 1.0
+    const yMin = -1.5
+    const yMax = 1.5
+    
+    for (let px = 0; px < width; px++) {
+      for (let py = 0; py < height; py++) {
+        const x0 = xMin + (px / width) * (xMax - xMin)
+        const y0 = yMin + (py / height) * (yMax - yMin)
+        
+        let x = 0
+        let y = 0
+        let iter = 0
+        
+        while (x * x + y * y <= 4 && iter < iterationCount) {
+          const xTemp = x * x - y * y + x0
+          y = 2 * x * y + y0
+          x = xTemp
+          iter++
+        }
+        
+        const idx = (py * width + px) * 4
+        if (iter === iterationCount) {
+          data[idx] = 0
+          data[idx + 1] = 0
+          data[idx + 2] = 0
+          data[idx + 3] = 255
+        } else {
+          const hue = (iter / iterationCount) * 360
+          const rgb = hslToRgb(hue / 360, 1, 0.5)
+          data[idx] = rgb[0]
+          data[idx + 1] = rgb[1]
+          data[idx + 2] = rgb[2]
+          data[idx + 3] = 255
+        }
+      }
+    }
+    
+    ctx.putImageData(imageData, 0, 0)
+  }, [iterationCount])
+  
   return (
-    <Canvas camera={{ position: [0, 0, 5] }} style={{ background: '#000', width: '100%', height: '100%' }}>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} />
-      <OrbitControls />
-      <MandelbulbBackground />
+    <group>
+      <mesh position={[0, 0, 0]} rotation={[0, 0, 0]}>
+        <planeGeometry args={[5, 3.5]} />
+        <meshBasicMaterial>
+          <canvas ref={canvasRef} width={500} height={350} style={{ display: 'none' }} />
+        </meshBasicMaterial>
+      </mesh>
+      <Text position={[-2.3, -1.5, 0]} fontSize={0.15} color="#00ff88" anchorX="left" anchorY="bottom">
+        MANDELBROT SET (2D attractor)
+      </Text>
+    </group>
+  )
+}
+        
+        const idx = (py * width + px) * 4
+        if (iter === iterationCount) {
+          data[idx] = 0
+          data[idx + 1] = 0
+          data[idx + 2] = 0
+          data[idx + 3] = 255
+        } else {
+          const hue = (iter / iterationCount) * 360
+          const rgb = hslToRgb(hue / 360, 1, 0.5)
+          data[idx] = rgb[0]
+          data[idx + 1] = rgb[1]
+          data[idx + 2] = rgb[2]
+          data[idx + 3] = 255
+        }
+      }
+    }
+    
+    ctx.putImageData(imageData, 0, 0)
+  }, [iterationCount])
+  
+  return (
+    <group>
+      <mesh position={[0, 0, 0]} rotation={[0, 0, 0]}>
+        <planeGeometry args={[5, 3.5]} />
+        <meshBasicMaterial>
+          <canvas ref={canvasRef} width={500} height={350} style={{ display: 'none' }} />
+        </meshBasicMaterial>
+      </mesh>
+      <Text position={[-2.3, -1.5, 0]} fontSize={0.15} color="#00ff88" anchorX="left" anchorY="bottom">
+        MANDELBROT SET (2D attractor)
+      </Text>
+    </group>
+  )
+}
+
+function hslToRgb(h, s, l) {
+  let r, g, b
+  
+  if (s === 0) {
+    r = g = b = l
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1
+      if (t > 1) t -= 1
+      if (t < 1/6) return p + (q - p) * 6 * t
+      if (t < 1/2) return q
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6
+      return p
+    }
+    
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s
+    const p = 2 * l - q
+    r = hue2rgb(p, q, h + 1/3)
+    g = hue2rgb(p, q, h)
+    b = hue2rgb(p, q, h - 1/3)
+  }
+  
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]
+}
+
+export default function Scene3D({ user, query, ai, iu, center, negotiationPositions, view2D }) {
+  return (
+    <Canvas camera={{ position: view2D ? [0, 0, 0.01] : [0, 0, 5] }} style={{ background: '#000', width: '100%', height: '100%' }}>
+      {!view2D && <ambientLight intensity={0.5} />}
+      {!view2D && <pointLight position={[10, 10, 10]} />}
+      {!view2D && <OrbitControls />}
+      {view2D ? <Mandelbrot2D /> : <MandelbulbBackground />}
       <KadmonGeometry />
       <AgentPositions negotiationPositions={negotiationPositions} />
       <Triangulation user={user} query={query} ai={ai} iu={iu} center={center} />
