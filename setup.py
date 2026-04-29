@@ -11,6 +11,7 @@ setup(
         "rich>=13.0",
         "typer>=0.9",
         "pydantic>=2.0",
+        "gradio>=4.0",
     ],
     entry_points={
         "console_scripts": [

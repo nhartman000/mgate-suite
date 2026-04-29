@@ -26,14 +26,18 @@ def main():
     if console.input("\nView best version or jump? (b/j/none): ").strip().lower() == "b":
         result['timeline'].get_best()
 
-    # APK Export
-    choice = console.input("\nExport APK? (b)uilder / (r)untime / none: ").strip().lower()
+    # APK Export / UI Launch
+    choice = console.input("\nExport APK? (b)uilder / (r)untime / (u)i / none: ").strip().lower()
     from exporter.android.builder import APKBuilder
     builder = APKBuilder(config['name'])
     if choice.startswith('b'):
         console.print(builder.export_builder_apk(config))
     elif choice.startswith('r'):
         console.print(builder.export_runtime_apk(config))
+    elif choice.startswith('u'):
+        console.print("[cyan]Launching Web Dashboard...[/cyan]")
+        import subprocess
+        subprocess.run(["python", "ui/dashboard.py"])
 
 if __name__ == "__main__":
     main()
