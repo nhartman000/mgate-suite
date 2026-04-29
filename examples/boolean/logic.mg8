@@ -1,7 +1,0 @@
-{
-  "gitson": "logic.gitson",
-  "gst": "logic.gst",
-  "qson": "out/logic.qson",
-  "model": "gemini-pro",
-  "seed": 42
-}

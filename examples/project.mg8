@@ -1,7 +1,0 @@
-{
-  "gitson": "example.gitson",
-  "gst": "example.gst",
-  "qson": "out/example.qson",
-  "model": "gemini-pro",
-  "seed": 42
-}
