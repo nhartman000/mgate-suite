@@ -1,0 +1,7 @@
+{
+  "gitson": "tote_example.gitson",
+  "gst": "tote_example.gst",
+  "qson": "out/tote_example.qson",
+  "model": "gemini-3-flash-preview",
+  "seed": 42
+}

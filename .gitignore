@@ -1,0 +1,6 @@
+
+node_modules/
+*/node_modules/
+
+*.egg-info/
+mg8-engine-ref/

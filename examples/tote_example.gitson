@@ -1,0 +1,71 @@
+{
+  "gates": [
+    {
+      "gate_id": "T1",
+      "gate_name": "VisualTest_Initial",
+      "gate_type": "tote_test",
+      "modality": "👀",
+      "adsr": { "attack": 1.0, "decay": 0.8, "sustain": 1.0, "release": 0.8, "pan": 0.5 },
+      "prompt_template": "Looking at the nail, is it nailed down? (status: sticking_up). If so, respond 'nailed_down', else respond 'not_done'.",
+      "expects": ["status"],
+      "produces": ["trace_id", "decision"],
+      "conditions": [],
+      "atomic_requirements": [],
+      "routing": {
+        "on_true": "DONE",
+        "on_false": "O1"
+      }
+    },
+    {
+      "gate_id": "O1",
+      "gate_name": "PhysicalOperate",
+      "gate_type": "tote_operate",
+      "modality": "👏👏",
+      "adsr": { "attack": 1.0, "decay": 1.0, "sustain": 1.0, "release": 1.0, "pan": 1.0 },
+      "prompt_template": "Take action: hammer the nail. Output the result.",
+      "expects": ["status"],
+      "produces": ["trace_id", "decision"],
+      "conditions": [],
+      "atomic_requirements": [],
+      "routing": {
+        "on_true": "T2",
+        "on_false": "T2"
+      }
+    },
+    {
+      "gate_id": "T2",
+      "gate_name": "VisualTest_Final",
+      "gate_type": "tote_test",
+      "modality": "👀",
+      "adsr": { "attack": 1.0, "decay": 0.8, "sustain": 1.0, "release": 0.8, "pan": 0.5 },
+      "prompt_template": "Look again. The nail has been hammered. Is it nailed_down?",
+      "expects": ["status"],
+      "produces": ["trace_id", "decision"],
+      "conditions": [],
+      "atomic_requirements": [],
+      "routing": {
+        "on_true": "DONE",
+        "on_false": "DONE"
+      }
+    },
+    {
+      "gate_id": "DONE",
+      "gate_name": "Exit",
+      "gate_type": "BOOLEAN",
+      "prompt_template": "Operation is complete.",
+      "conditions": [{"left": 1, "operator": "=", "right": 1}],
+      "expects": [],
+      "produces": ["trace_id", "decision"],
+      "atomic_requirements": []
+    }
+  ],
+  "graph": {
+    "nodes": ["T1", "O1", "T2", "DONE"],
+    "edges": [
+      {"from": "T1", "to": "DONE"},
+      {"from": "T1", "to": "O1"},
+      {"from": "O1", "to": "T2"},
+      {"from": "T2", "to": "DONE"}
+    ]
+  }
+}

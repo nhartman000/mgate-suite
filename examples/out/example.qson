@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "run_trace_id": "RUN_6feda28e-706b-4cd7-aced-0f6605e16219",
+  "context_ref": "CTX_PHOTOSYNTHESIS",
+  "model": "gemini-pro",
+  "responses": [],
+  "events": [
+    {
+      "trace_id": "TRJ_93aed6a7-4f3b-433a-89e1-13af013fc9b0",
+      "parent_trace_id": "RUN_6feda28e-706b-4cd7-aced-0f6605e16219",
+      "run_trace_id": "RUN_6feda28e-706b-4cd7-aced-0f6605e16219",
+      "source_objects": {
+        "gate_id": "G1",
+        "gst_id": "CTX_PHOTOSYNTHESIS"
+      },
+      "source_paths": {
+        "mg8": "project.mg8",
+        "gitson": "example.gitson",
+        "gst": "example.gst"
+      },
+      "decision": "approve",
+      "status": "pass",
+      "confidence_at_decision": 0.9,
+      "ambiguity": false,
+      "rule_triggered": [
+        "R1"
+      ],
+      "timestamp": "2026-04-03T12:51:22.659093"
+    }
+  ]
+}

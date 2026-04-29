@@ -1,0 +1,49 @@
+name: Validate MGATE Files
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.3.0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Run validator on examples
+        run: |
+          python -c "
+          from engine.loader import load_project
+          from engine.validator import validate_mg8, validate_gate_contract
+          project = load_project('examples/project.mg8')
+          validate_mg8(project.mg8)
+          validate_gate_contract(project.gitson['gates'], project.gst)
+          print('✓ All example files validated successfully')
+          "
+          
+      - name: Test execution with mock model
+        run: |
+          python cli/run_project.py examples/project.mg8
+          test -f examples/out/example.qson && echo "✓ QSON generated successfully"
+          
+      - name: Validate generated QSON
+        run: |
+          python -c "
+          import json
+          from engine.validator import validate_qson
+          with open('examples/out/example.qson') as f:
+            qson = json.load(f)
+          validate_qson(qson)
+          print('✓ Generated QSON is valid')
+          "

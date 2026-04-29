@@ -1,0 +1,10 @@
+{
+  "name": "CodeOptimizerAgent",
+  "description": "Recursive self-improving code quality agent",
+  "optimization_targets": ["clean_code", "efficiency"],
+  "initial_state": {
+    "performance": 0.45,
+    "coherence": 0.6,
+    "stability": 0.7
+  }
+}

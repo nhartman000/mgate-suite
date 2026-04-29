@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "run_trace_id": "RUN_d8f5f7e9-a166-48cf-a948-de8043803a6d",
+  "context_ref": "CTX_HAMMER_NAIL",
+  "model": "gemini-pro",
+  "responses": [],
+  "events": [
+    {
+      "trace_id": "TRJ_e481d404-ed10-474c-bcf9-af9e5ab227f2",
+      "parent_trace_id": "RUN_d8f5f7e9-a166-48cf-a948-de8043803a6d",
+      "run_trace_id": "RUN_d8f5f7e9-a166-48cf-a948-de8043803a6d",
+      "source_objects": {
+        "gate_id": "T1",
+        "gst_id": "CTX_HAMMER_NAIL"
+      },
+      "source_paths": {
+        "mg8": "tote_example.mg8",
+        "gitson": "tote_example.gitson",
+        "gst": "tote_example.gst"
+      },
+      "decision": "approve",
+      "status": "pass",
+      "confidence_at_decision": 0.9,
+      "ambiguity": false,
+      "rule_triggered": [],
+      "timestamp": "2026-04-23T00:46:55.522305"
+    },
+    {
+      "trace_id": "TRJ_5798f83e-abfb-4d5f-84ad-92c619b19945",
+      "parent_trace_id": "TRJ_e481d404-ed10-474c-bcf9-af9e5ab227f2",
+      "run_trace_id": "RUN_d8f5f7e9-a166-48cf-a948-de8043803a6d",
+      "source_objects": {
+        "gate_id": "DONE",
+        "gst_id": "CTX_HAMMER_NAIL"
+      },
+      "source_paths": {
+        "mg8": "tote_example.mg8",
+        "gitson": "tote_example.gitson",
+        "gst": "tote_example.gst"
+      },
+      "decision": "approve",
+      "status": "pass",
+      "confidence_at_decision": 0.9,
+      "ambiguity": false,
+      "rule_triggered": [],
+      "timestamp": "2026-04-23T00:46:56.387740"
+    }
+  ]
+}

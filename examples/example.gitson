@@ -1,0 +1,17 @@
+{
+  "gates": [
+    {
+      "gate_id": "G1",
+      "gate_name": "ExplainPhotosynthesis",
+      "prompt_template": "Explain photosynthesis simply.",
+      "expects": ["event_candidate","confidence","ambiguity"],
+      "produces": ["decision","status","trace_id"],
+      "atomic_requirements": [{"req_id":"R1","requirement":"be factual"}],
+      "failure_policy": {"on_reject":"halt"}
+    }
+  ],
+  "graph": {
+    "nodes": ["G1"],
+    "edges": []
+  }
+}
