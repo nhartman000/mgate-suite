@@ -12,25 +12,19 @@ def main():
         sys.exit(1)
 
     config = json.loads(Path(sys.argv[1]).read_text())
+    console.print(f"[bold cyan]🚀 NychForge → {config['name']}[/bold cyan]")
 
-    console.print(f"[bold cyan]🚀 NychForge Recursive Optimization → {config['name']}[/bold cyan]")
-
-    optimizer = RecursiveOptimizer(max_iterations=10)
+    optimizer = RecursiveOptimizer(max_iterations=12)
     result = optimizer.optimize_trait(
         trait_name=config["optimization_targets"][0],
         initial_state=config.get("initial_state", {})
     )
 
     console.print("\n[bold green]✅ Optimization Complete![/bold green]")
-    console.print(f"Best Version: [yellow]{result['best_version']}[/yellow]")
-    console.print(f"Final Performance: [bold]{result['final_state'].get('performance', 0):.3f}[/bold]")
 
     # Timeline Navigation
-    answer = console.input("\nJump to a previous version? (version number / no): ").strip()
-    if answer.isdigit():
-        version = int(answer)
-        old_state = result['timeline'].jump_to(version)
-        console.print(f"[blue]Jumped to version {version}:[/blue] {old_state}")
+    if console.input("\nView best version or jump? (b/j/none): ").strip().lower() == "b":
+        result['timeline'].get_best()
 
     # APK Export
     choice = console.input("\nExport APK? (b)uilder / (r)untime / none: ").strip().lower()

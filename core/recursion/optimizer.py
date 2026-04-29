@@ -44,9 +44,13 @@ class RecursiveOptimizer:
                 gate.phase = gate.next_phase()
                 gate.intensity = max(0.25, gate.intensity * 0.78)
 
+        best_state = self.timeline.get_best()
+        best_version = max(self.timeline.history, key=lambda x: x.score).version
+
         return {
             "final_state": state,
-            "best_version": max(self.timeline.history, key=lambda x: x.score).version,
+            "best_state": best_state,
+            "best_version": best_version,
             "timeline": self.timeline,
             "nych_symbols": self.nych_symbols
         }
