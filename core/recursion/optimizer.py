@@ -1,51 +1,48 @@
 from core.adsr.gating import ADSRGate, ADSRPhase
 from core.timeline.checkpoint import Timeline
 from core.nych.protocol import NychSymbol
-from typing import Callable, Dict, List
+from core.nych.llm_bridge import NychLLM
+from typing import Dict
 
 class RecursiveOptimizer:
-    def __init__(self, max_iterations: int = 20):
+    def __init__(self, max_iterations: int = 12):
         self.max_iterations = max_iterations
         self.timeline = Timeline()
-        self.nych_symbols: List[NychSymbol] = []
+        self.llm = NychLLM()
+        self.nych_symbols = []
 
-    def optimize_trait(self, 
-                      trait_name: str, 
-                      initial_state: Dict, 
-                      evaluate_fn: Callable[[Dict], float],
-                      edit_fn: Callable[[Dict, float], Dict]):
-        
+    def optimize_trait(self, trait_name: str, initial_state: Dict):
         state = initial_state.copy()
         gate = ADSRGate(trait_name, ADSRPhase.ATTACK, intensity=1.0)
-        
-        print(f"\n🔧 Optimizing trait: {trait_name} using ADSR + Nych")
+
+        print(f"\n🔧 Optimizing trait: {trait_name} [LLM Powered]")
 
         for i in range(self.max_iterations):
-            score = evaluate_fn(state)
+            score = self.llm.evaluate_trait(trait_name, state)
             
-            checkpoint = self.timeline.save(trait_name, state, gate.phase.value, score)
+            self.timeline.save(trait_name, state, gate.phase.value, score)
             
             print(f"  Step {i:2d} | Phase: {gate.phase.value.upper():7} | "
                   f"Score: {score:.3f} | Intensity: {gate.intensity:.2f}")
 
-            # Apply Nych symbolic self-edit
-            if score > 0.7:
-                self.nych_symbols.append(NychSymbol(
-                    name=f"OPT_{trait_name.upper()}_{i}",
-                    meaning=f"Strengthen {trait_name}",
-                    action="increase_coherence"
-                ))
-
-            if gate.phase == ADSRPhase.SUSTAIN and score >= 0.92:
+            if gate.phase == ADSRPhase.SUSTAIN and score >= 0.90:
                 print("✅ Sweet spot reached!")
                 break
-                
-            state = edit_fn(state, gate.intensity)
-            
-            # ADSR Phase Transition
-            if i > self.max_iterations * 0.5:
+
+            # Real LLM edit
+            state = self.llm.suggest_edit(trait_name, state, gate.intensity)
+
+            # Nych Symbol
+            self.nych_symbols.append(NychSymbol(
+                f"OPT_{trait_name.upper()}_{i}",
+                f"Improve {trait_name}",
+                "increase_coherence"
+            ))
+
+            # ADSR Transition
+            if i > self.max_iterations * 0.45:
                 gate.phase = gate.next_phase()
-                gate.intensity = max(0.3, gate.intensity * 0.75)
+                gate.intensity = max(0.25, gate.intensity * 0.78)
 
         return {
             "final_state": state,
