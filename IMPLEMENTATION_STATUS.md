@@ -1,118 +1,142 @@
-# mgate-suite Implementation Status
+# mgate-suite Implementation Status — Historical Profile
 
-Last updated: 2026-04-02
+**Historical implementation snapshot:** April 2, 2026  
+**Canonical-boundary note added:** August 22, 2026
+
+> This file describes an **earlier implementation profile**. The executable code and schemas documented below are preserved as development/provenance material, but their older file-role assignments are not the current canonical MG8 standard.
+
+## Canonical mapping
+
+Before using the historical status tables, apply this mapping:
+
+| Historical profile | Current canonical baseline |
+|---|---|
+| `.mg8` = orchestration/project file | `.mg8` = bounded execution unit/container; `.ork` = orchestration |
+| `.gitson` = embedded gate graph | auxiliary/legacy; not in the current core family |
+| `.gst` = context modifiers | structured state/context/constraints with prior/current continuity |
+| `.g8son` = individual Boolean gate | bounded conditional gate/operator file; 1–3 gates per file |
+| `.qson` = audit trace | retained as event-level trace with distinct run/gate/trace identities |
+| `.zipson` = domain/package | package/composition role is now `.mg8pk` |
+
+Current canonical repositories are linked from the root README.
 
 ---
 
-## ✅ COMPLETED
+## Historical completed components
 
-### 1. Core File Specifications
-| File Type | Status | Schema | Description |
-|---|---|---|---|
-| `.mg8` | ✅ Complete | `spec/mg8.schema.json` | Orchestration file. 1:1:1 rule (1 GITSON + 1 GST + 1 QSON) |
-| `.gitson` | ✅ Complete | `spec/gitson.schema.json` | Gate graph container. Embeds all G8SON gates internally |
-| `.gst` | ✅ Complete | `spec/gst.schema.json` | Gestalt context modifiers. Environment, posture, emits contract |
-| `.g8son` | ✅ Complete | `spec/g8son.schema.json` | Individual gate definition. AND/OR/NAND/NOR/BOOLEAN types |
-| `.qson` | ✅ Complete | `spec/qson.schema.json` | Audit trace log. Full chain-of-custody trace IDs |
-| `.zipson` | ✅ Complete | `spec/zipson.schema.json` | Operational domain package. Collection of MG8s |
+### 1. File specifications implemented in this repository
 
-### 2. Engine Modules
-| Module | Status | Location |
+| Historical file type | Historical status | Historical location / meaning |
 |---|---|---|
-| Loader | ✅ Complete | `engine/loader.py` | Relative path resolution, full project loading |
-| Validator | ✅ Complete | `engine/validator.py` | BOM detection, forbidden keys, relative paths, contract validation, trace uniqueness |
-| Executor | ✅ Complete | `engine/executor.py` | DAG topological sort, cycle detection, boolean gate logic, conditional routing |
-| Audit Log | ✅ Complete | `engine/audit.py` | `RUN_*` / `TRJ_*` trace ID generation, QSON writer |
-| Model Adapter | ✅ Complete | `engine/model_adapter.py` | Vertex Gemini integration + deterministic mock fallback |
+| `.mg8` | implemented | project/orchestration profile used by this engine |
+| `.gitson` | implemented | gate-graph container used by this profile |
+| `.gst` | implemented | gestalt/context profile |
+| `.g8son` | implemented | gate definitions including Boolean operators |
+| `.qson` | implemented | audit trace profile |
+| `.zipson` | implemented | package/domain experiment |
 
-### 3. Executable Components
+These schemas remain useful for reproducing the historical engine. They are **not a substitute for the current dedicated canonical specs**.
+
+### 2. Historical engine modules
+
+| Module | Status | Location | Role in this profile |
+|---|---|---|---|
+| Loader | implemented | `engine/loader.py` | relative path / project loading |
+| Validator | implemented | `engine/validator.py` | profile contract validation |
+| Executor | implemented | `engine/executor.py` | DAG ordering, cycle checks, gate routing |
+| Audit Log | implemented | `engine/audit.py` | run/trajectory trace generation |
+| Model Adapter | implemented | `engine/model_adapter.py` | Vertex/Gemini adapter plus historical mock behavior |
+
+### 3. Executable components
+
 | Component | Status | Path |
 |---|---|---|
-| CLI Runner | ✅ Complete | `cli/run_project.py` | Single command execution: `python cli/run_project.py path/to/project.mg8` |
-| CI Workflow | ✅ Complete | `.github/workflows/validate.yml` | Validates all files on PR/push, runs test execution |
+| CLI runner | implemented | `cli/run_project.py` |
+| CI workflow | implemented | `.github/workflows/validate.yml` |
 
-### 4. Working Examples
-| Example | Status | Path |
-|---|---|---|
-| Basic Photosynthesis | ✅ Complete | `examples/project.mg8` | Single gate linear execution |
-| Boolean Logic Gates | ✅ Complete | `examples/boolean/logic.mg8` | AND/OR/NAND/NOR conditional branch routing |
+### 4. Historical examples
 
----
+- Basic photosynthesis project — `examples/project.mg8`
+- Boolean-gate branch example — `examples/boolean/logic.mg8`
 
-## 🧰 IMPLEMENTED FEATURES
-
-### Trace System
-- `RUN_{uuid}` generated once per execution
-- `TRJ_{uuid}` generated **per gate execution attempt**
-- Parent trace linking (single + multi-parents)
-- No trace ID reuse enforced by validator
-- Full causal chain preserved in QSON
-
-### Gate Logic
-```
-Gate Types:    AND / OR / NAND / NOR / BOOLEAN
-Operators:     = / != / > / < / >= / <= / contains
-Routing:       on_true / on_false branch execution
-Failure Policy: halt / continue / human_verify
-```
-
-### Validator Strict Rules
-❌ Rejects UTF-8 BOM
-❌ Rejects absolute paths
-❌ Rejects forbidden root keys (`project_name`, `metadata`, `notes`)
-❌ Rejects missing fields
-❌ Rejects gate/gestalt contract mismatches
-❌ Rejects duplicate trace IDs
-❌ Rejects cycles in DAG
-
-### Vertex Integration
-- Default model: `gemini-pro`
-- Project: `true-artwork-479005-r3`
-- Location: `us-central1`
-- Deterministic seed support
-- Automatic mock fallback when Vertex credentials not present
+These should be read using the historical schemas in this repository.
 
 ---
 
-## 📂 Repository Structure
-```
-mgate-suite/
-├── REBUILD_SPEC.md       ✅ Full authoritative specification
-├── STACK.md              ✅ Execution hierarchy diagram
-├── IMPLEMENTATION_STATUS.md  ✅ This file
-├── requirements.txt      ✅ jsonschema, google-cloud-aiplatform
-├── spec/                 ✅ All JSON schemas
-├── engine/               ✅ Full engine implementation
-├── cli/run_project.py    ✅ CLI entrypoint
-├── examples/             ✅ Working test projects
-└── .github/workflows/    ✅ CI validation
+## Historical trace model
+
+This profile implemented:
+
+```text
+RUN_{uuid}  — execution-level identity
+TRJ_{uuid}  — generated per gate execution attempt
 ```
 
----
+It also included parent-trace relationships and duplicate-trace rejection. The current QSON repository retains the event-identity principle but provides the current public trace specification.
 
-## ▶️ RUN CURRENT SYSTEM
+## Historical gate/runtime model
+
+The profile implemented operators and routing such as:
+
+```text
+Gate types: AND / OR / NAND / NOR / BOOLEAN
+Operators: = / != / > / < / >= / <= / contains
+Routing: on_true / on_false
+Failure policy: halt / continue / human_verify
+```
+
+These capabilities remain implementation evidence; they should not be interpreted as the complete or mandatory operator catalog of current G8SON.
+
+## Historical validator behavior
+
+The implementation included checks for conditions such as:
+
+- UTF-8 BOM handling/rejection;
+- absolute path restrictions;
+- required fields/profile keys;
+- contract mismatches;
+- duplicate trace IDs;
+- DAG cycles.
+
+Some of these remain useful implementation techniques, while canonical file contracts should now be taken from the dedicated repositories.
+
+## Historical model adapter
+
+The April 2026 profile referenced Vertex/Gemini configuration and included a mock fallback when credentials were unavailable.
+
+A mock fallback should **not** be interpreted as evidence that a real model provider executed. New runtime work should label simulated/mock execution explicitly and avoid silently substituting it for a requested live provider.
+
+## Historical run commands
+
+For reproduction of this repository's older profile:
 
 ```bash
 pip install -r requirements.txt
-
-# Run basic example
 python cli/run_project.py examples/project.mg8
-
-# Run boolean logic example
 python cli/run_project.py examples/boolean/logic.mg8
 ```
 
-Output QSON files are written to `examples/out/`
+Output behavior follows this repository's historical implementation, not necessarily the newer dedicated QSON schema.
 
----
+## Known unimplemented items in the historical snapshot
 
-## 🔲 NOT YET IMPLEMENTED
+At the April 2026 snapshot, items documented as incomplete included:
 
-- ZIPSON orchestrator (run multiple MG8s)
-- Human verify gate failure mode
-- Persisted state between gate executions
-- Dynamic value passing between gates
-- CLI validator standalone command
-- Unit test suite
-- Multi-parent join nodes (currently single parent only)
-- Threshold confidence evaluation for atomic requirements
+- ZIPSON multi-MG8 orchestrator;
+- human-verify failure mode;
+- persisted state between gate executions;
+- dynamic value passing between gates;
+- standalone CLI validator;
+- complete unit-test suite;
+- multi-parent join nodes;
+- threshold-confidence evaluation for atomic requirements.
+
+## Current development guidance
+
+For new work:
+
+1. treat this repository as a historical/experimental implementation profile;
+2. use the dedicated MG8/GST/G8SON/QSON repos as the public interface authority;
+3. use `.ork` for orchestration in new canonical work;
+4. use `.mg8pk` for the package/composition role rather than extending `.zipson` as if it were the current standard;
+5. do not silently fall back from real providers to mocks when reporting a real execution result.
